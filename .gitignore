@@ -1,0 +1,11 @@
+# Raw third-party data — download instructions in README.md
+data/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
