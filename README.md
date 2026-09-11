@@ -7,7 +7,7 @@ SQL analysis of 175,777 food-delivery orders to find out why deliveries run late
 ## The headline findings
 
 - **8.14% of deliveries breach a 60-minute mark** (14,316 of 175,777 orders).
-- **Dasher (driver) understaffing is the strongest lever found**: the SLA breach rate is roughly flat and low (~1–2%) as long as the driver pool has slack, then jumps to **12.6%** once zero dashers are on shift — an **11x spread**, with a clean threshold around 80% utilization.
+- **Dasher (driver) understaffing is the strongest lever found**: the SLA breach rate is roughly flat and low (~1–2%) as long as the driver pool has slack, then jumps to 9.8–10.3% once it's fully or over-utilized (80–150% busy), and hits **12.6%** when zero dashers are on shift — an **11x spread** vs. the best-staffed band. (One caveat: an extreme 150%+ busy reading, ~3% of orders, actually drops back to a 2.9% breach rate — likely a small-sample artifact of markets with very few dashers, not a real trend reversal. See `INSIGHTS.md` §3.1.)
 - **One market (Market 1) is the slowest overall — and it isn't because of distance or driver shortage.** It has the *shortest* average drives of any market and a driver-utilization ratio no worse than two better-performing markets. The extra ~5 minutes happens before the driver even starts moving — pointing at prep/dispatch delay, not logistics.
 - Order size and hour-of-day both add real, predictable variation — see [`INSIGHTS.md`](./INSIGHTS.md) for the full breakdown.
 
@@ -59,7 +59,7 @@ Every query in `analysis.sql` was validated end-to-end against a real MySQL-comp
 
 ## What the SQL demonstrates
 
-- Data-quality auditing (negative values, price-integrity violations, flagged not silently dropped)
+- Data-quality auditing (negative values, price-integrity violations — quantified and flagged, never silently dropped)
 - CTEs and subqueries for multi-step aggregation
 - `RANK() OVER (ORDER BY ...)` window functions for market and store-category ranking
 - A derived-metric root-cause query (isolating "non-driving time" to separate a distance problem from a dispatch problem)

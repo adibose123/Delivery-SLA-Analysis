@@ -8,26 +8,8 @@
 USE porter_delivery;
 
 -- ------------------------------------------------------------
--- 0. SCHEMA (for reference — see schema.sql for the real DDL)
+-- 0. SCHEMA — see schema.sql for the full table definition
 -- ------------------------------------------------------------
--- CREATE TABLE deliveries (
---   market_id                                      INT,
---   created_at                                      DATETIME,
---   actual_delivery_time                            DATETIME,
---   store_primary_category                          INT,     -- 73 categories (coded)
---   order_protocol                                  INT,     -- 7 order-channel codes
---   total_items                                     INT,
---   subtotal                                        INT,     -- cents
---   num_distinct_items                              INT,
---   min_item_price                                  INT,
---   max_item_price                                  INT,
---   total_onshift_dashers                           INT,
---   total_busy_dashers                              INT,
---   total_outstanding_orders                        INT,
---   estimated_store_to_consumer_driving_duration    INT,     -- seconds
---   duration_min                                    DECIMAL(10,2), -- computed in data_prep.py
---   valid_dasher_data                               TINYINT(1)     -- 0/1 flag, see data_prep.py
--- );
 
 -- ------------------------------------------------------------
 -- 1. DATA QUALITY CHECKS
@@ -83,8 +65,7 @@ ORDER BY dasher_load;
 -- ------------------------------------------------------------
 
 -- 4a. Rank markets by avg duration and SLA breach rate
---     NOTE: MySQL requires every derived table (subquery in FROM) to have
---     an alias — `AS market_stats` below is required, unlike SQLite.
+--     NOTE: every derived table (subquery in FROM) needs an alias in MySQL — `AS market_stats` below.
 SELECT market_id, orders, avg_duration_min, pct_over_60min,
   RANK() OVER (ORDER BY avg_duration_min DESC) AS duration_rank
 FROM (
@@ -115,7 +96,6 @@ ORDER BY avg_non_driving_min DESC;
 -- ------------------------------------------------------------
 
 -- 5a. Duration and order volume by hour of day
---     SQLite used strftime('%H', created_at); MySQL has a native HOUR().
 SELECT HOUR(created_at) AS hr,
   COUNT(*) AS orders,
   ROUND(AVG(duration_min), 1) AS avg_duration_min

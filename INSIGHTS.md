@@ -1,8 +1,8 @@
 # Porter Delivery Time — SQL Analytics Project
 
 **Dataset:** Kaggle — Porter Delivery Time Estimation Dataset (175,777 orders, ~4 weeks, Jan–Feb 2015)
-**Tools:** Python (light ETL) → SQLite (all analysis) → matplotlib (charts)
-**Files:** `data_prep.py`, `analysis.sql`, `porter.db`, this report
+**Tools:** Python (light ETL) → MySQL (all analysis) → matplotlib (charts)
+**Files:** `data_prep.py`, `schema.sql`, `analysis.sql`, this report
 
 *Note on provenance: this dataset's schema is an exact match for the well-known DoorDash delivery-duration take-home dataset, republished on Kaggle under the Porter name. The data itself is real operational data — the analysis below treats it as such.*
 
@@ -40,10 +40,11 @@ Raw CSV: 175,777 rows — order timestamps, market/store/category codes, order s
 | No dashers on shift | 3,538 | 51.1 min | **12.6%** |
 | 100–150% busy | 65,148 | 48.0 min | 10.3% |
 | 80–100% busy | 64,819 | 46.8 min | 9.8% |
+| 150%+ busy | 5,436 | 41.8 min | 2.9% |
 | 50–80% busy | 31,434 | 42.2 min | 1.8% |
 | <50% busy | 5,361 | 41.6 min | **1.1%** |
 
-The breach rate is roughly flat and low (~1–2%) as long as the dasher pool has slack, then jumps sharply once dashers cross into being fully or over-utilized. That's a clean, actionable threshold — not a gradual drift.
+The breach rate is roughly flat and low (~1–2%) while the dasher pool has slack (under 80% busy), then jumps to 9.8–10.3% once the pool is fully or over-utilized (80–150% busy), and is worst of all (12.6%) when there are literally zero dashers on shift. One caveat worth flagging rather than smoothing over: the 150%+ bucket (5,436 orders, ~3% of the data) breaks the pattern, dropping back down to a 2.9% breach rate. That's most likely because an extreme ratio like 200% busy usually comes from a market with only 1–2 dashers on shift in the first place — a noisy small-sample reading rather than a real capacity signal. So the actionable threshold is the 80–150% band plus zero-dasher shifts; the 150%+ segment isn't reliable enough to draw a conclusion from either way.
 
 ### 3.2 Market 1's problem isn't distance or dasher ratio — it's something upstream of the drive
 
@@ -71,7 +72,7 @@ Order volume is negligible from 9am–1pm (a handful of orders total) and peaks 
 ### 3.4 Order size and category both add predictable, real variation
 
 - **Order size:** 43.0 min (1 item) → 45.4 min (2–3) → 48.7 min (4–6) → 52.0 min (7+) — a clean, monotonic relationship. Reasonable to build size-adjusted SLA targets rather than one flat number.
-- **Store category:** among categories with enough volume to trust (1,000+ orders), breach rates range from **2.7% to 12.9%** — a real, ranked list in `analysis.sql` §7, useful for category-specific ops attention rather than a blanket policy.
+- **Store category:** among categories with enough volume to trust (1,000+ orders), the 10 worst-performing categories range from **10.0% to 17.8%** breach — see the ranked list in `analysis.sql` §7, useful for category-specific ops attention rather than a blanket policy.
 
 ### 3.5 Data quality, documented not hidden
 
@@ -89,14 +90,14 @@ Order volume is negligible from 9am–1pm (a handful of orders total) and peaks 
 ## 5. Limitations
 
 - ~4 weeks of data (Jan 21 – Feb 18, 2015) — enough for hour-of-day and category patterns, not enough for a real week-over-week or seasonal trend.
-- `order_protocol` is an uninterpreted numeric code — real variation exists across it (43.2–47.8 min), but without a lookup table for what each code means (app vs phone vs partner API, etc.), that finding is descriptive, not yet actionable.
+- `order_protocol` is an uninterpreted numeric code — real variation exists across it (41.9–47.8 min), but without a lookup table for what each code means (app vs phone vs partner API, etc.), that finding is descriptive, not yet actionable.
 - The "non-driving time" figure in §3.2 is a derived proxy (total time minus estimated driving time), not a directly measured prep/dispatch field — good for pointing at the right question, not a substitute for real prep-time instrumentation.
 
 ## 6. Files in This Project
 
 | File | Purpose |
 |---|---|
-| `data_prep.py` | Loads raw CSV, computes delivery duration, flags bad dasher-count rows, builds `porter.db` |
+| `data_prep.py` | Loads raw CSV, computes delivery duration, flags bad dasher-count rows, loads into MySQL |
 | `analysis.sql` | All SQL: data quality, SLA-breach analysis, dasher-load buckets, market root-cause breakdown, hourly patterns, window-function rankings |
-| `porter.db` | SQLite database, ready to query |
+| `schema.sql` | MySQL `CREATE DATABASE` / `CREATE TABLE` definition |
 | `chart_*.png` | Supporting charts referenced above |

@@ -17,12 +17,14 @@ Env vars (all optional, defaults shown):
     MYSQL_PASSWORD=
     MYSQL_DB=porter_delivery
 
-Cleaning decisions (all kept, not silently dropped, so the analysis stays
+Cleaning decisions (kept and flagged, not deleted, so the analysis stays
 transparent about data quality):
-  - 21 rows have negative total_onshift_dashers (sensor/logging error,
-    impossible in reality). Flagged via a `valid_dasher_data` column rather
-    than deleted, so SQL queries about dasher supply can filter them out
-    while everything else about the order stays usable.
+  - 41 rows have a negative dasher count (sensor/logging error, impossible
+    in reality): 21 rows have negative total_onshift_dashers, 21 have
+    negative total_busy_dashers, with 1 row negative in both. All 41 are
+    flagged via a `valid_dasher_data` column rather than deleted, so SQL
+    queries about dasher supply can filter them out while everything else
+    about the order stays usable.
   - 701 rows have min_item_price > max_item_price and 161 rows have
     subtotal <= 0 — left as-is (not corrupting the delivery-duration
     target variable), but noted in analysis.sql's data-quality section.
@@ -59,4 +61,4 @@ engine = create_engine(
 # append the data into it rather than letting pandas guess types.
 df.to_sql("deliveries", engine, if_exists="append", index=False, chunksize=5000)
 
-print(f"Loaded {len(df):,} rows into MySQL database '{MYSQL_DB}'.deliveries")
+print(f"Loaded {len(df):,} rows into {MYSQL_DB}.deliveries")
