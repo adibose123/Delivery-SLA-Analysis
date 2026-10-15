@@ -2,12 +2,10 @@
 
 SQL analysis of 175,777 food-delivery orders to find out why deliveries run late, and what's actually driving it.
 
-> **Dataset provenance note:** this dataset's schema is an exact match for the well-known DoorDash delivery-duration dataset, republished on Kaggle under the "Porter" name. The data is real operational data — treated as such throughout this analysis.
-
 ## The headline findings
 
 - **8.14% of deliveries breach a 60-minute mark** (14,316 of 175,777 orders).
-- **Dasher (driver) understaffing is the strongest lever found**: the SLA breach rate is roughly flat and low (~1–2%) as long as the driver pool has slack, then jumps to 9.8–10.3% once it's fully or over-utilized (80–150% busy), and hits **12.6%** when zero dashers are on shift — an **11x spread** vs. the best-staffed band. (One caveat: an extreme 150%+ busy reading, ~3% of orders, actually drops back to a 2.9% breach rate — likely a small-sample artifact of markets with very few dashers, not a real trend reversal. See `INSIGHTS.md` §3.1.)
+- **Dasher (driver) understaffing is the strongest lever found**: the SLA breach rate is roughly flat and low (~1–2%) as long as the driver pool has slack, then jumps to 9.8–10.3% once it's fully or over-utilized (80–150% busy), and hits **12.6%** when zero dashers are on shift — an **11x spread** vs. the best-staffed band. (One caveat: an extreme 150%+ busy reading, ~3% of orders, actually drops back to a 2.9% breach rate — likely a small-sample artifact of markets with very few dashers, not a real trend reversal. See `INSIGHTS.md`)
 - **One market (Market 1) is the slowest overall — and it isn't because of distance or driver shortage.** It has the *shortest* average drives of any market and a driver-utilization ratio no worse than two better-performing markets. The extra ~5 minutes happens before the driver even starts moving — pointing at prep/dispatch delay, not logistics.
 - Order size and hour-of-day both add real, predictable variation — see [`INSIGHTS.md`](./INSIGHTS.md) for the full breakdown.
 
