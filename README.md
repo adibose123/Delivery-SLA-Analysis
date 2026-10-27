@@ -9,10 +9,6 @@ SQL analysis of 175,777 food-delivery orders to find out why deliveries run late
 - **One market (Market 1) is the slowest overall — and it isn't because of distance or driver shortage.** It has the *shortest* average drives of any market and a driver-utilization ratio no worse than two better-performing markets. The extra ~5 minutes happens before the driver even starts moving — pointing at prep/dispatch delay, not logistics.
 - Order size and hour-of-day both add real, predictable variation — see [`INSIGHTS.md`](./INSIGHTS.md) for the full breakdown.
 
-| SLA breach by driver utilization | Market 1 root-cause breakdown |
-|---|---|
-| ![SLA breach by dasher load](charts/chart_sla_by_dasher_load.png) | ![Market breakdown](charts/chart_market_breakdown.png) |
-
 **Full write-up with all findings, business recommendations, and limitations: [`INSIGHTS.md`](./INSIGHTS.md)**
 
 ## Repo structure
@@ -65,7 +61,7 @@ Every query in `analysis.sql` was validated end-to-end against a real MySQL-comp
 
 ## Tech stack
 
-Python (pandas, SQLAlchemy) for lightweight ETL → MySQL for all analysis → matplotlib for charts.
+Python (pandas, SQLAlchemy) for lightweight ETL → MySQL for all analysis
 
 ## Limitations
 
